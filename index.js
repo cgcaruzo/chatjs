@@ -1,6 +1,8 @@
 const message = document.getElementById('message');
 const send = document.getElementById("send");
 const chat = document.getElementById("chat");
+const user = prompt("What's your name?");
+message.focus()
 
 const firebaseConfig = {
   databaseURL: "https://chatjs-e8555-default-rtdb.firebaseio.com",
@@ -8,26 +10,26 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
-const messagesRef = firebase.database().ref('/messages');
+const messagesRef = firebase.database().ref('/messages').limitToLast(1000);
 
 const writeMessage = (user, message) => {
-  var currentDate = moment().tz("America/Argentina/Buenos_Aires").format("YYYY-MM-DD HH:mm:ss");
-  var data = {
+  let currentDate = moment().tz("America/Argentina/Buenos_Aires").format("YYYY-MM-DD HH:mm:ss");
+  let data = {
     datetime: currentDate,
     user: user,
     message : message
   };
-  console.log("DATA: ", data);
   firebase.database().ref("/messages").push(data);
 };
 
 const refreshChat = (messages) => {
   chat.innerHTML = "";
   messages.forEach(message => {
-    var data = message.val();
-
-    var liElem = document.createElement('li');
-    var textElem = document.createTextNode(`${data.datetime} - [${data.user}]: ${data.message}`);
+    let data = message.val();
+    let liElem = document.createElement('li');
+    let textElem = document.createTextNode(`
+      ${data.datetime} ~ [${data.user}]: ${data.message}
+      `);
     liElem.appendChild(textElem);
     chat.appendChild(liElem);
   });
@@ -36,8 +38,9 @@ const refreshChat = (messages) => {
 
 send.addEventListener("click", function(event){
   event.preventDefault();
-  writeMessage('cgcaruzo', message.value);
+  writeMessage(user, message.value);
   message.value = null;
+  message.focus();
 });
 
 
